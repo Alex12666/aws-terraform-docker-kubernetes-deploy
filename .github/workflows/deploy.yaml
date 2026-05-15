@@ -1,0 +1,14 @@
+name: projeto terraform kubenet aws docker github action
+
+on:
+  push:
+    branches:
+      - main  # Ou 'master', dependendo do nome da sua branch principal
+
+jobs:
+  projeto:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: messagem fuiconamneto
+        run: echo "testando fuiciamento  do  git action"
