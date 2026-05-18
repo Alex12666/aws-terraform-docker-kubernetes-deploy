@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG: Explorador e Ferreiro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Aventuras na Floresta</h1>
+        
+        <!-- Painel de Status e Inventário -->
+        <div class="status-panel">
+            <p>💰 Ouro: <span id="player-gold">0</span></p>
+            <p>⚔️ Dano da Espada: Lvl <span id="weapon-level">1</span> (+<span id="weapon-bonus">0</span> dmg)</p>
+        </div>
+
+        <!-- Área dos Personagens -->
+        <div class="battlefield">
+            <!-- Jogador -->
+            <div class="char-card" id="player-card">
+                <h2>Você</h2>
+                <div class="hp-bar-container"><div class="hp-bar" id="player-hp-bar"></div></div>
+                <p>HP: <span id="player-hp">100</span>/100</p>
+                <p>Mana: <span id="player-mana">30</span>/30</p>
+            </div>
+
+            <!-- Inimigo -->
+            <div class="char-card" id="enemy-card" style="opacity: 0.3;">
+                <h2 id="enemy-name">Nenhum Monstro</h2>
+                <div class="hp-bar-container"><div class="hp-bar" id="enemy-hp-bar"></div></div>
+                <p>HP: <span id="enemy-hp">0</span>/<span id="enemy-max-hp">0</span></p>
+            </div>
+        </div>
+
+        <!-- Log de Eventos -->
+        <div class="log-box">
+            <p id="battle-log">Você está na cidade seguro. Clique em "Explorar Floresta" para procurar perigo!</p>
+        </div>
+
+        <!-- Painel de Controle -->
+        <div class="controls">
+            <!-- Ações do Mundo -->
+            <button class="btn world-btn" id="btn-explore" onclick="explorarFloresta()">🌲 Explorar Floresta</button>
+            <button class="btn world-btn" id="btn-blacksmith" onclick="melhorarArma()">🔨 Ferreiro (Custo: <span id="upgrade-cost">15</span> 💰)</button>
+            <button class="btn world-btn" id="btn-rest" onclick="descansar()">💤 Descansar na Estalagem (Grátis)</button>
+
+            <!-- Ações de Combate (Começam desativadas) -->
+            <hr style="width:100%; border: 1px solid #444; margin: 10px 0;">
+            <button class="btn combat-btn" id="btn-attack" onclick="atacar()" disabled>⚔️ Atacar</button>
+            <button class="btn combat-btn magic" id="btn-magic" onclick="lancarMagia()" disabled>🔥 Bola de Fogo</button>
+            <button class="btn combat-btn heal" id="btn-heal" onclick="curar()" disabled>💚 Curar</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

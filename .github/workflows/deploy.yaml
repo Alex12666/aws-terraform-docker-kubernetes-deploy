@@ -3,12 +3,21 @@ name: projeto terraform kubenet aws docker github action
 on:
   push:
     branches:
-      - main  # Ou 'master', dependendo do nome da sua branch principal
-
+      - main  
 jobs:
   projeto:
     runs-on: ubuntu-latest
 
     steps:
+      
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+
       - name: messagem fuiconamneto
-        run: echo "testando fuiciamento  do  git action"
+        run: echo "execuçao da imgem docker"
+
+      - name: rodando docker
+        run: docker build -t minha-imagem ./web
+
+      
+

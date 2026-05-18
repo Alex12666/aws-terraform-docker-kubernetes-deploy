@@ -1,0 +1,111 @@
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.game-container {
+    width: 90%;
+    max-width: 650px;
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    text-align: center;
+}
+
+h1 { color: #ffcc00; margin-top: 0; }
+
+.status-panel {
+    display: flex;
+    justify-content: space-around;
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #ffcc00;
+}
+
+.battlefield {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.char-card {
+    flex: 1;
+    background-color: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #3c3c3c;
+    transition: opacity 0.3s ease;
+}
+
+.hp-bar-container {
+    background-color: #444;
+    width: 100%;
+    height: 12px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.hp-bar {
+    background-color: #ff3333;
+    width: 100%;
+    height: 100%;
+    transition: width 0.2s ease;
+}
+
+.log-box {
+    background-color: #0b0b0b;
+    border-left: 5px solid #ffcc00;
+    padding: 12px;
+    min-height: 50px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn {
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.world-btn { background-color: #445544; }
+.world-btn:hover:not(:disabled) { background-color: #556655; }
+#btn-blacksmith { background-color: #664422; }
+#btn-blacksmith:hover:not(:disabled) { background-color: #775533; }
+
+.combat-btn { background-color: #553333; }
+.combat-btn:hover:not(:disabled) { background-color: #664444; }
+.btn.magic { background-color: #2244aa; }
+.btn.magic:hover:not(:disabled) { background-color: #3355bb; }
+.btn.heal { background-color: #227722; }
+.btn.heal:hover:not(:disabled) { background-color: #338833; }
