@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # ----------------- CONTAINER DO BACKEND -----------------
+  backend:
+    build:
+      context: ./backend # Entra direto na pasta backend (minúscula) que está do lado dele
+      dockerfile: Dockerfile
+    container_name: rpg-backend
+    ports:
+      - "3000:3000"
+    networks:
+      - rpg-network
+
+  # ----------------- CONTAINER DO FRONTEND -----------------
+  frontend:
+    build:
+      context: ./Frontend # Entra direto na pasta Frontend (F maiúsculo) que está do lado dele
+      dockerfile: Dockerfile
+    container_name: rpg-frontend
+    ports:
+      - "80:80"
+    networks:
+      - rpg-network
+    depends_on:
+      - backend
+
+networks:
+  rpg-network:
+    driver: bridge

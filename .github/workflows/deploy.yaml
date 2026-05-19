@@ -19,12 +19,12 @@ jobs:
         run: echo "Iniciando o build das imagens Docker do RPG..."
 
       
-      
+     
       - name: Rodando Docker - Backend
-        run: docker build -t meu-rpg-backend ./web/backend
+        run: docker build -t meu-rpg-backend -f ./web/backend/Dockerfile ./web/backend
 
-      
+     
       - name: Rodando Docker - Frontend
-        run: docker build -t meu-rpg-frontend ./web/Frontend
+        run: docker build -t meu-rpg-frontend -f ./web/Frontend/Dockerfile ./web/Frontend
       
 
