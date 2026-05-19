@@ -28,11 +28,11 @@ let custoUpgrade = 15;
 // Atualizar dados na tela
 function atualizarInterface() {
     // Jogador
-    document.getElementById("player-hp").innerText = jogador.hp;
-    document.getElementById("player-mana").innerText = jogador.mana;
     document.getElementById("player-gold").innerText = jogador.ouro;
     document.getElementById("weapon-level").innerText = jogador.nivelArma;
     document.getElementById("weapon-bonus").innerText = jogador.bonusArma;
+    document.getElementById("player-hp").innerText = jogador.hp;
+    document.getElementById("player-mana").innerText = jogador.mana;
     document.getElementById("player-hp-bar").style.width = (jogador.hp / jogador.maxHp * 100) + "%";
 
     // Inimigo
@@ -63,11 +63,9 @@ function explorarFloresta() {
     }
 
     emCombate = true;
-    // Escolhe um monstro aleatório da lista
     let r = Math.floor(Math.random() * monstrosDaFloresta.length);
     let modelo = monstrosDaFloresta[r];
 
-    // Clona os dados do modelo para o monstro atual
     inimigo.nome = modelo.nome;
     inimigo.maxHp = modelo.hp;
     inimigo.hp = modelo.hp;
@@ -78,17 +76,19 @@ function explorarFloresta() {
 }
 
 // MECÂNICA 2: MELHORAR DANO NO FERREIRO COM GOLD
-function melhorarmassa() {} // Apenas um nome alternativo
 function melhorarArma() {
     if (jogador.ouro >= custoUpgrade) {
         jogador.ouro -= custoUpgrade;
         jogador.nivelArma += 1;
-        jogador.bonusArma += 5; // Aumenta +5 de dano por upgrade
+        jogador.bonusArma += 5;
         
-        custoUpgrade = Math.floor(custoUpgrade * 1.8); // O próximo upgrade fica mais caro
+        custoUpgrade = Math.floor(custoUpgrade * 1.8);
         
         document.getElementById("battle-log").innerHTML = `🔨 O Ferreiro martelou sua espada! Ela subiu para o <strong>Nível ${jogador.nivelArma}</strong> (+5 de Dano).`;
         atualizarInterface();
+        
+        // GATILHO: Salva no backend após gastar ouro no upgrade
+        salvarNoBackend();
     }
 }
 
@@ -105,7 +105,6 @@ function descansar() {
 function atacar() {
     if (!emCombate) return;
 
-    // O dano total é o Dano Base + o Bônus do Ferreiro
     let danoTotal = Math.floor(Math.random() * jogador.baseAtaque) + 5 + jogador.bonusArma;
     inimigo.hp -= danoTotal;
     if (inimigo.hp < 0) inimigo.hp = 0;
@@ -137,6 +136,7 @@ function lancarMagia() {
     }
 }
 
+// Função de cura
 function curar() {
     if (!emCombate) return;
     if (jogador.mana >= 5) {
@@ -163,10 +163,9 @@ function turnoDoInimigo() {
     checarFimDeCombate();
 }
 
-// MECÂNICA DE GANHAR MOEDA RANDOMICA AO MATAR MONSTRO
+// MECÂNICA DE TERMINAR COMBATE E SALVAR
 function checarFimDeCombate() {
     if (inimigo.hp <= 0) {
-        // Drop de ouro aleatório (ex: entre 10 e 25 de ouro)
         let ouroGanhado = Math.floor(Math.random() * 15) + 10;
         jogador.ouro += ouroGanhado;
         
@@ -174,18 +173,58 @@ function checarFimDeCombate() {
         
         emCombate = false;
         atualizarInterface();
+        
+        // GATILHO: Salva o ouro ganho no banco
+        salvarNoBackend();
         return true;
     } else if (jogador.hp <= 0) {
         document.getElementById("battle-log").innerHTML = `💀 <strong>Você desmaiou!</strong> O monstro te venceu. Você foi arrastado de volta para a cidade e perdeu metade do seu ouro.`;
         
-        jogador.ouro = Math.floor(jogador.ouro / 2); // Penalidade por morrer
-        jogador.hp = 20; // Acorda fraco
+        jogador.ouro = Math.floor(jogador.ouro / 2);
+        jogador.hp = 20;
         emCombate = false;
         atualizarInterface();
+        
+        // GATILHO: Salva a perda de ouro no banco
+        salvarNoBackend();
         return true;
     }
     return false;
 }
 
-// Iniciar
+// --- INTEGRAÇÃO COM O BACKEND NODE.JS ---
+
+let idJogadorSalvo = null;
+const URL_BACKEND = "http://localhost:3000";
+
+function iniciarSessaoNoBackend() {
+    fetch(`${URL_BACKEND}/novo-jogador`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            idJogadorSalvo = data.id;
+            console.log("ID recebido do Backend:", idJogadorSalvo);
+        })
+        .catch(err => console.error("Erro ao conectar no backend:", err));
+}
+
+function salvarNoBackend() {
+    if (!idJogadorSalvo) return;
+
+    fetch(`${URL_BACKEND}/salvar-progresso`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id: idJogadorSalvo,
+            ouro: jogador.ouro,
+            nivelArma: jogador.nivelArma,
+            bonusArma: jogador.bonusArma
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Resposta do servidor:", data.mensagem))
+    .catch(err => console.error("Erro ao salvar:", err));
+}
+
+// EXECUÇÃO INICIAL (Quando a página abre)
 atualizarInterface();
+iniciarSessaoNoBackend(); // Pede o ID único do jogador assim que o jogo inicia

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  
+
 jobs:
   projeto:
     runs-on: ubuntu-latest
@@ -13,11 +14,17 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      - name: messagem fuiconamneto
-        run: echo "execuçao da imgem docker"
+      
+      - name: Mensagem de funcionamento
+        run: echo "Iniciando o build das imagens Docker do RPG..."
 
-      - name: rodando docker
-        run: docker build -t minha-imagem ./web
+      
+      - name: Rodando Docker - Backend
+        run: docker build -t meu-rpg-backend ./web/Backend
+
+      
+      - name: Rodando Docker - Frontend
+        run: docker build -t meu-rpg-frontend ./web
 
       
 
