@@ -1,10 +1,10 @@
-# ⚔️ RPG: Explorador e Ferreiro — Infraestrutura Automatizada na AWS
+#  RPG: Explorador e Ferreiro — Infraestrutura Automatizada na AWS
 
 Este repositório contém toda a arquitetura de infraestrutura como código (IaC) utilizando Terraform e a esteira de CI/CD via GitHub Actions para o deploy automatizado de um jogo RPG estilo Web. O projeto foi desenhado focando no isolamento completo entre o ambiente público (Frontend) e privado (Backend) para máxima segurança.
 
 ---
 
-## 🎮 Demonstração do Jogo
+##  Demonstração do Jogo
 
 As imagens abaixo mostram a interface do jogo rodando de forma totalmente automatizada e isolada dentro da nossa instância na AWS:
 
