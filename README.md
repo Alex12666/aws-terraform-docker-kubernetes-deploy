@@ -1,53 +1,42 @@
-
 # ⚔️ RPG: Explorador e Ferreiro — Infraestrutura Automatizada na AWS
 
-Este repositório contém o código da aplicação e, principalmente, toda a arquitetura de infraestrutura como código (IaC) e a esteira de CI/CD para fazer o deploy automatizado de um jogo RPG estilo Web (Frontend em HTML/JS e Backend em Flask).
-
-O projeto foi desenhado para ser totalmente isolado, seguro e escalável, utilizando as melhores práticas do ecossistema DevOps.
+Este repositório contém toda a arquitetura de infraestrutura como código (IaC) utilizando Terraform e a esteira de CI/CD via GitHub Actions para o deploy automatizado de um jogo RPG estilo Web. O projeto foi desenhado focando no isolamento completo entre o ambiente público (Frontend) e privado (Backend) para máxima segurança.
 
 ---
 
 ## 🎮 Demonstração do Jogo
 
-As imagens abaixo mostram o jogo a rodar oficialmente de forma limpa e isolada dentro da instância EC2 na AWS:
+As imagens abaixo mostram a interface do jogo rodando de forma totalmente automatizada e isolada dentro da nossa instância na AWS:
 
 | Tela Inicial (Cidade Segura) | Sistema de Combate (Na Floresta) |
 | :---: | :---: |
-| <img src="./jogo.png" width="450px" alt="Tela Inicial do RPG"> | <img src="./jkjkj.png" width="450px" alt="Combate com Orc no RPG"> |
+| <img src="./game%20.png" width="450px" alt="Tela Inicial do RPG"> | <img src="./jkjkj.png" width="450px" alt="Combate com Orc no RPG"> |
 
 ---
 
-## 🛠️ Tecnologias e Ferramentas Utilizadas
+## 🏗️ Arquitetura da Infraestrutura & Rede (VPC)
 
-* **Provedor Cloud:** AWS (Amazon Web Services) — Instância EC2, Grupos de Segurança (VPC) e ECR (Elastic Container Registry).
-* **Infraestrutura como Código (IaC):** Terraform — Para provisionar a máquina, chaves SSH e regras de rede automaticamente.
-* **Contentorização:** Docker — Para isolar o Frontend (porta `80`) e o Backend (porta `5000`).
-* **Automação CI/CD:** GitHub Actions — Pipeline automatizado que faz o build das imagens, envia para o ECR e faz o deploy via SSH na máquina final a cada `git push`.
+O projeto utiliza conceitos avançados de rede na AWS para separar o tráfego que vem da internet daquilo que deve ficar protegido nos bastidores do servidor:
 
----
-
-## 🏗️ Como a Arquitetura Funciona
-
-1. **Código e Segurança:** O código é protegido localmente por um arquivo `.gitignore` que impede a subida de chaves privadas `.pem` ou estados do Terraform para o GitHub.
-2. **Provisionamento:** O Terraform cria uma instância Ubuntu na AWS e associa a chave de segurança criptografada (`nova-chave.pem`).
-3. **Pipeline (CI/CD):** Ao fazer um push para a branch `main`:
-   * O GitHub Actions faz o login seguro na AWS usando Secrets.
-   * Compila os `Dockerfiles` do Frontend e Backend no ambiente do runner.
-   * Envia as imagens para o repositório privado do Amazon ECR.
-   * Conecta-se via SSH na EC2 usando a `nova-chave.pem` (armazenada nos Secrets do GitHub).
-   * Descarrega as novas imagens do ECR para dentro da EC2 e reinicia os contentores automaticamente.
-
----
-
-## 🚀 Comandos Úteis do Projeto
-
-### 🎛️ Gestão da Infraestrutura (Terraform)
-```bash
-# Iniciar o diretório do Terraform e descarregar os plugins
-terraform init
-
-# Validar e aplicar as mudanças para criar a máquina na AWS
-terraform apply -auto-approve
-
-# Destruir toda a infraestrutura com segurança quando terminar o laboratório
-terraform destroy -auto-approve
+```text
+[ INTERNET (Seu Navegador) ]
+          │
+          │ Porta 80 (HTTP)
+          ▼
+┌─────────────────────────────────── AWS VPC ───────────────────────────────────┐
+│                                                                               │
+│  🟢 SUBREDE PÚBLICA (Acessível da Internet)                                    │
+│  ┌─────────────────────────────────────┐   ┌───────────────────────────────┐  │
+│  │ Container: rpg-frontend (Porta 80)  │   │  🛰️ NAT Gateway               │  │
+│  │ - Entrega a interface do jogo.      │   │  - Atrelado a um EIP (IP Fixo)│  │
+│  └──────────────────┬──────────────────┘   └───────────────▲───────────────┘  │
+│                     │                                      │                  │
+│                     │ Requisições de API (Internas)        │ Acesso de Saída  │
+│                     ▼                                      │ (Updates/Logs)   │
+│  🔴 SUBREDE PRIVADA (Totalmente Isolada)                    │                  │
+│  ┌─────────────────────────────────────────────────────────┴───────────────┐  │
+│  │ Container: rpg-backend (Porta 5000)                                     │  │
+│  │ - API que processa as regras de negócio e a lógica do RPG.              │  │
+│  │ - NÃO possui IP público e está blindado contra ataques externos.       │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+└───────────────────────────────────────────────────────────────────────────────┘
