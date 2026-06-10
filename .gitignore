@@ -1,38 +1,27 @@
-*.tfstate
-*.tfstate.*
-
-
-.terraform/
-
-
-*.tfvars.json
-override.tf
-override.tf.json
-
-# Ignorar logs de quebra do Terraform
-crash.log
-
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-
+# === Chaves de Segurança e Credenciais (CRÍTICO) ===
+Devops-Automation.pem
+*.pem
+*.key
+*.pub
+credentials
+.aws/
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
+# === Arquivos e Estados do Terraform ===
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json
+.terraform.lock.hcl
 
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# === Docker e Logs ===
+*.log
+.docker/
 
-
-
-
-
-
-
+# === Dependências de Código (Node / Python) ===
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
