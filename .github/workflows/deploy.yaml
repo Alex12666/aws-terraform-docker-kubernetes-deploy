@@ -10,21 +10,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      
+      # 1. Autentica na AWS usando as chaves dos seus Secrets
+      - name: Configurar Credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      # 2. Faz o login oficial no registro do seu ECR
+      - name: Login no Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Mensagem de funcionamento
-        run: echo "Iniciando o build das imagens Docker do RPG..."
+        run: echo "Iniciando o build e push das imagens Docker do RPG..."
 
-      
-     
+      # 3. Builda e envia o Backend para o ECR (usando a URL do seu registro)
       - name: Rodando Docker - Backend
-        run: docker build -t meu-rpg-backend -f ./web/backend/Dockerfile ./web/backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/imagem_docker:backend-latest -f ./web/backend/Dockerfile ./web/backend
+          docker push $ECR_REGISTRY/imagem_docker:backend-latest
 
-     
+      # 4. Builda e envia o Frontend para o ECR (mesmo repositório, tag diferente)
       - name: Rodando Docker - Frontend
-        run: docker build -t meu-rpg-frontend -f ./web/Frontend/Dockerfile ./web/Frontend
-      
-
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/imagem_docker:frontend-latest -f ./web/Frontend/Dockerfile ./web/Frontend
+          docker push $ECR_REGISTRY/imagem_docker:frontend-latest
