@@ -13,7 +13,7 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      # 1. Autentica na AWS usando as chaves dos seus Secrets
+      # 1. Autentica na AWS usando os seus Secrets (Key ID e Secret Key)
       - name: Configurar Credenciais da AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -21,26 +21,44 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      # 2. Faz o login oficial no registro do seu ECR
+      # 2. Faz o login no ECR para liberar o upload das imagens
       - name: Login no Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Mensagem de funcionamento
-        run: echo "Iniciando o build e push das imagens Docker do RPG..."
+      # 3. Faz APENAS O PUSH das imagens que já estão geradas/buildadas no passo anterior
+      - name: Subir Imagens prontas para o ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/imagem_docker:backend-latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/imagem_docker:frontend-latest
 
-      # 3. Builda e envia o Backend para o ECR (usando a URL do seu registro)
-      - name: Rodando Docker - Backend
+      # 4. Conecta na EC2 usando o NOVO IP e a chave .pem dos seus Secrets
+      - name: Executar Deploy na EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker build -t $ECR_REGISTRY/imagem_docker:backend-latest -f ./web/backend/Dockerfile ./web/backend
-          docker push $ECR_REGISTRY/imagem_docker:backend-latest
-
-      # 4. Builda e envia o Frontend para o ECR (mesmo repositório, tag diferente)
-      - name: Rodando Docker - Frontend
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker build -t $ECR_REGISTRY/imagem_docker:frontend-latest -f ./web/Frontend/Dockerfile ./web/Frontend
-          docker push $ECR_REGISTRY/imagem_docker:frontend-latest
+        with:
+          host: ${{ secrets.AWS_INSTANCE_PUBLIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: ECR_REGISTRY
+          script: |
+            # Se o docker não estiver na máquina nova, instala direto
+            if ! command -v docker &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y docker.io awscli
+              sudo usermod -aG docker ubuntu
+            fi
+            
+            # Autentica a nova EC2 no ECR usando a URL do registro
+            aws ecr get-login-password --region us-east-2 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY
+            
+            # Limpa containers antigos se houver algum resquício
+            sudo docker rm -f rpg-frontend rpg-backend 2>/dev/null || true
+            
+            # Baixa as imagens que o GitHub acabou de empurrar para o ECR
+            sudo docker pull $ECR_REGISTRY/imagem_docker:backend-latest
+            sudo docker pull $ECR_REGISTRY/imagem_docker:frontend-latest
+            
+            # Roda os containers de forma isolada na máquina nova
+            sudo docker run -d --name rpg-backend -p 5000:5000 $ECR_REGISTRY/imagem_docker:backend-latest
+            sudo docker run -d --name rpg-frontend -p 80:80 $ECR_REGISTRY/imagem_docker:frontend-latest
