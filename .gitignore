@@ -1,4 +1,5 @@
 # === Chaves de Segurança e Credenciais (CRÍTICO) ===
+nova-chave.pem
 Devops-Automation.pem
 *.pem
 *.key
@@ -6,6 +7,7 @@ Devops-Automation.pem
 credentials
 .aws/
 .env
+*Zone.Identifier
 
 # === Arquivos e Estados do Terraform ===
 .terraform/
